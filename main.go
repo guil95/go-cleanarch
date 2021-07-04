@@ -6,7 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/guil95/go-cleanarch/config"
 	userDomain "github.com/guil95/go-cleanarch/user/domain"
-	userRepository "github.com/guil95/go-cleanarch/user/infra/repositories"
+	userInfra "github.com/guil95/go-cleanarch/user/infra/repositories"
 	"log"
 )
 
@@ -18,6 +18,6 @@ func main() {
 	}
 	defer db.Close()
 
-	userService := userDomain.NewService(userRepository.NewMysqlUserRepository(db))
+	userService := userDomain.NewService(userInfra.NewMysqlUserRepository(db))
 	fmt.Println(userService.GetUser(userDomain.NewUUID()))
 }
