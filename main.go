@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/guil95/go-cleanarch/config"
+	userApplication "github.com/guil95/go-cleanarch/user/application"
 	userDomain "github.com/guil95/go-cleanarch/user/domain"
 	userInfra "github.com/guil95/go-cleanarch/user/infra/repositories"
 	"log"
@@ -18,6 +19,6 @@ func main() {
 	}
 	defer db.Close()
 
-	userService := userDomain.NewService(userInfra.NewMysqlUserRepository(db))
+	userService := userApplication.NewService(userInfra.NewMysqlUserRepository(db))
 	fmt.Println(userService.GetUser(userDomain.NewUUID()))
 }
