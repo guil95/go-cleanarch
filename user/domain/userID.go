@@ -12,6 +12,6 @@ func NewUUID() UUID {
 
 //StringToUUID convert a string to an user UUID
 func StringToUUID(s string) (UUID, error) {
-	uuid, err := uuid.Parse(s)
-	return UUID(uuid), err
+	parseUuid, err := uuid.Parse(s)
+	return UUID(parseUuid), err
 }
