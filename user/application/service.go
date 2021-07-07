@@ -16,7 +16,7 @@ func (s Service) GetUser(userID user.UUID) (error, *user.User){
 	err, u := s.repo.Get(userID)
 
 	if err != nil {
-		panic(err)
+		return err, nil
 	}
 
 	return nil, u
