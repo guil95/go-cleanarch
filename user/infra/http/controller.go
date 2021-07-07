@@ -12,10 +12,10 @@ import (
 )
 
 func CreateApi(r *mux.Router, db *sql.DB) {
-	r.Handle("/users/{id}", index(userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db))))
+	r.Handle("/users/{id}", findById(userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db))))
 }
 
-func index(service *userApplication.Service) http.Handler {
+func findById(service *userApplication.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
