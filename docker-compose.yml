@@ -1,0 +1,27 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-cleanarch.dev
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+  db:
+    container_name: db.go-cleanarch
+    image: mysql:5.7
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password --init-file /db/migrations/init.sql
+    volumes:
+      - ./db/migrations/init.sql:/db/migrations/init.sql
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=cleanarch_go_db

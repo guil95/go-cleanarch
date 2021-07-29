@@ -1,58 +1,46 @@
 package user
 
 import (
-	"database/sql"
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	userApplication "github.com/guil95/go-cleanarch/user/application"
 	userDomain "github.com/guil95/go-cleanarch/user/domain"
 	userInfrastructure "github.com/guil95/go-cleanarch/user/infra/repositories"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 )
 
-func CreateApi(r *mux.Router, db *sql.DB) {
-	r.Handle("/users/{id}", findById(userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db))))
+func CreateApi(r *gin.Engine, db *gorm.DB) {
+	r.GET("/users/:id", func(context *gin.Context) {
+		findById(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+	})
 }
 
-func findById(service *userApplication.Service) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+func findById(c *gin.Context,service *userApplication.Service) {
+	idParam := c.Param("id")
 
-		id, err := userDomain.StringToUUID(vars["id"])
+	id, err := userDomain.StringToUUID(idParam)
 
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			err := json.NewEncoder(w).Encode(NewResponseError("Unprocessable entity"))
+	if err != nil {
+		log.Println(err.Error())
+		c.JSON(http.StatusUnprocessableEntity, NewResponseError("Unprocessable entity"))
+	}
 
-			if err != nil {
-				return
-			}
+	err, user := service.GetUser(id)
 
+	if err != nil {
+		if err == userDomain.UserNotFound {
+			log.Println(fmt.Sprintf("User %s not found", id))
+			c.JSON(http.StatusNotFound, NewResponseError("User not found"))
 			return
 		}
 
-		err, user := service.GetUser(id)
+		log.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, NewResponseError("Internal Server Error"))
+		return
+	}
 
-		if err != nil {
-			log.Println(err.Error())
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			err := json.NewEncoder(w).Encode(NewResponseError("Internal server error"))
-
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(user)
-		if err != nil {
-			return
-		}
-	})
+	c.JSON(http.StatusOK, user)
+	return
 }

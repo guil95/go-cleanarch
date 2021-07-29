@@ -1,18 +1,24 @@
 package api
 
 import (
-	"database/sql"
-	"github.com/gorilla/mux"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	userInfrastructure "github.com/guil95/go-cleanarch/user/infra/http"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 )
 
-func Run(db *sql.DB) {
+func Run(db *gorm.DB) {
 	log.Println("Listen server on :8000")
-	r := mux.NewRouter()
+	router := gin.Default()
 
-	userInfrastructure.CreateApi(r, db)
+	router.GET("/", func(context *gin.Context) {
+		context.JSON(http.StatusOK, gin.H{"message": "Poc golang clean arch"})
+	})
+	
+	userInfrastructure.CreateApi(router, db)
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("API_PORT")), router))
 }

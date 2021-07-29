@@ -1,21 +1,38 @@
 package user
 
 import (
-	"database/sql"
-	user "github.com/guil95/go-cleanarch/user/domain"
+	"errors"
+	"fmt"
+	userDomain "github.com/guil95/go-cleanarch/user/domain"
+	"gorm.io/gorm"
+	"log"
 )
 
 type MysqlUserRepository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewMysqlUserRepository(db *sql.DB) *MysqlUserRepository {
+func NewMysqlUserRepository(db *gorm.DB) *MysqlUserRepository {
 	return &MysqlUserRepository{
 		db: db,
 	}
 }
 
 
-func (repo MysqlUserRepository) Get(uuid user.UUID) (error, *user.User) {
-	return nil, user.NewUser("Guilherme", "Rodrigues", 26)
+func (repo MysqlUserRepository) Get(uuid userDomain.UUID) (error, *userDomain.User) {
+	var u userDomain.User
+
+	tx := repo.db.Model(u).First(&u, "identifier = ?", uuid.String())
+
+	if tx.Error != nil {
+		log.Println(tx.Error.Error())
+
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return userDomain.UserNotFound, nil
+		}
+
+		return tx.Error, nil
+	}
+	fmt.Println(u)
+	return nil, &u
 }

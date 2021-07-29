@@ -1,18 +1,25 @@
 package user
 
+import (
+	"errors"
+)
+
+var UserNotFound = errors.New("User not found")
+//var UsersNotFound = errors.New("Users not found")
+
 //User struct
 type User struct {
-	UUID UUID
-	FirstName string `json:"name"`
-	LastName  string `json:"lastname"`
-	Age       int    `json:"age"`
+	Identifier  UUID `json:"identifier"`
+	Name    string `gorm:"type:string;default:null" json:"name"`
+	Lastname     string `gorm:"type:string;default:null" json:"lastname"`
+	Age          int    `gorm:"type:int;default:null" json:"age"`
 }
 
 func NewUser(firstName string, lastName string, age int) *User {
 	return &User{
-		UUID: NewUUID(),
-		FirstName: firstName,
-		LastName: lastName,
+		Identifier: NewUUID(),
+		Name: firstName,
+		Lastname: lastName,
 		Age: age,
 	}
 }
