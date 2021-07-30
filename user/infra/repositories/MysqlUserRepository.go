@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	userDomain "github.com/guil95/go-cleanarch/user/domain"
 	"gorm.io/gorm"
 	"log"
@@ -18,7 +17,6 @@ func NewMysqlUserRepository(db *gorm.DB) *MysqlUserRepository {
 	}
 }
 
-
 func (repo MysqlUserRepository) Get(uuid userDomain.UUID) (error, *userDomain.User) {
 	var u userDomain.User
 
@@ -33,6 +31,34 @@ func (repo MysqlUserRepository) Get(uuid userDomain.UUID) (error, *userDomain.Us
 
 		return tx.Error, nil
 	}
-	fmt.Println(u)
+
+	return nil, &u
+}
+
+func (repo MysqlUserRepository) Create(user *userDomain.User) (error, *userDomain.User) {
+	tx := repo.db.Create(user)
+
+	if tx.Error != nil {
+		log.Println(tx.Error.Error())
+		return tx.Error, nil
+	}
+
+	return nil, user
+}
+
+func (repo MysqlUserRepository) SearchByName(userName string) (error, *userDomain.User) {
+	var u userDomain.User
+
+	tx := repo.db.Model(u).First(&u, "name = ?", userName)
+
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return userDomain.UserNotFound, nil
+		}
+
+		log.Println(tx.Error.Error())
+		return tx.Error, nil
+	}
+
 	return nil, &u
 }
