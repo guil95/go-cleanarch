@@ -12,6 +12,10 @@ import (
 )
 
 func CreateApi(r *gin.Engine, db *gorm.DB) {
+	r.GET("/users", func(context *gin.Context) {
+		list(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+	})
+
 	r.GET("/users/:id", func(context *gin.Context) {
 		findById(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 	})
@@ -19,6 +23,25 @@ func CreateApi(r *gin.Engine, db *gorm.DB) {
 	r.POST("/users", func(context *gin.Context) {
 		save(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 	})
+}
+
+func list(c *gin.Context, service *userApplication.Service) {
+	err, users := service.ListUser()
+
+	if err != nil {
+		if err == userDomain.UserNotFound {
+			log.Println(fmt.Sprintf("Users not found"))
+			c.JSON(http.StatusNotFound, NewResponseError("Users not found"))
+			return
+		}
+
+		log.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, NewResponseError("Internal Server Error"))
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+	return
 }
 
 func findById(c *gin.Context, service *userApplication.Service) {

@@ -17,6 +17,24 @@ func NewMysqlUserRepository(db *gorm.DB) *MysqlUserRepository {
 	}
 }
 
+func (repo MysqlUserRepository) List() (error, *[]userDomain.User) {
+	var u []userDomain.User
+
+	tx := repo.db.Model(u).Find(&u)
+
+	if tx.Error != nil {
+		log.Println(tx.Error.Error())
+
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return userDomain.UserNotFound, nil
+		}
+
+		return tx.Error, nil
+	}
+
+	return nil, &u
+}
+
 func (repo MysqlUserRepository) Get(uuid userDomain.UUID) (error, *userDomain.User) {
 	var u userDomain.User
 

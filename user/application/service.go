@@ -22,6 +22,16 @@ func (s Service) GetUser(userID user.UUID) (error, *user.User) {
 	return nil, u
 }
 
+func (s Service) ListUser() (error, *[]user.User) {
+	err, u := s.repo.List()
+
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, u
+}
+
 func (s Service) SaveUser(userToSave *user.User) (error, *user.User) {
 	err, userExists := s.repo.SearchByName(userToSave.Name)
 
