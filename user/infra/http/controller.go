@@ -23,6 +23,10 @@ func CreateApi(r *gin.Engine, db *gorm.DB) {
 	r.POST("/users", func(context *gin.Context) {
 		save(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 	})
+
+	r.POST("/users-batch", func(context *gin.Context) {
+		saveBatch(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+	})
 }
 
 func list(c *gin.Context, service *userApplication.Service) {
@@ -75,7 +79,7 @@ func findById(c *gin.Context, service *userApplication.Service) {
 type UserPayload struct {
 	Firstname string `json:"firstname" binding:"required"`
 	Lastname  string `json:"lastname" binding:"required"`
-	Age       int    `json:"age" binding:"required,min=1"`
+	Age       int64  `json:"age" binding:"required,min=1"`
 }
 
 func save(c *gin.Context, service *userApplication.Service) {
@@ -114,4 +118,15 @@ func save(c *gin.Context, service *userApplication.Service) {
 
 	c.JSON(http.StatusCreated, userCreated)
 	return
+}
+
+func saveBatch(c *gin.Context, service *userApplication.Service) {
+	file, _, err := c.Request.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, NewResponseError("Internal Server Error"))
+		return
+	}
+
+	service.SaveUserBatch(file)
 }

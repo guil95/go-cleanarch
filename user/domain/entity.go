@@ -12,10 +12,10 @@ type User struct {
 	Identifier UUID   `json:"identifier"`
 	Name       string `gorm:"type:string;default:null" json:"name"`
 	Lastname   string `gorm:"type:string;default:null" json:"lastname"`
-	Age        int    `gorm:"type:int;default:null" json:"age"`
+	Age        int64  `gorm:"type:int;default:null" json:"age"`
 }
 
-func NewUser(firstName string, lastName string, age int) *User {
+func NewUser(firstName string, lastName string, age int64) *User {
 	return &User{
 		Identifier: NewUUID(),
 		Name:       firstName,

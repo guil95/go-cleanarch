@@ -64,6 +64,17 @@ func (repo MysqlUserRepository) Create(user *userDomain.User) (error, *userDomai
 	return nil, user
 }
 
+func (repo MysqlUserRepository) CreateBatch(users []*userDomain.User, userMaxSimultaneous int) error {
+	tx := repo.db.Create(users)
+
+	if tx.Error != nil {
+		log.Println(tx.Error.Error())
+		return tx.Error
+	}
+
+	return nil
+}
+
 func (repo MysqlUserRepository) SearchByName(userName string) (error, *userDomain.User) {
 	var u userDomain.User
 
