@@ -3,9 +3,9 @@ package user
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	userApplication "github.com/guil95/go-cleanarch/user/application"
-	userDomain "github.com/guil95/go-cleanarch/user/domain"
-	userInfrastructure "github.com/guil95/go-cleanarch/user/infra/repositories"
+	userApplication "github.com/guil95/go-cleanarch/core/user/application"
+	userDomain "github.com/guil95/go-cleanarch/core/user/domain"
+	userInfrastructure "github.com/guil95/go-cleanarch/core/user/infra/repositories"
 	"gorm.io/gorm"
 	"log"
 	"net/http"

@@ -2,7 +2,7 @@ package user
 
 import (
 	"errors"
-	userDomain "github.com/guil95/go-cleanarch/user/domain"
+	userDomain "github.com/guil95/go-cleanarch/core/user/domain"
 	"gorm.io/gorm"
 	"log"
 )

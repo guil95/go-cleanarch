@@ -3,7 +3,7 @@ package user
 import (
 	"bufio"
 	"encoding/csv"
-	"github.com/guil95/go-cleanarch/user/domain"
+	"github.com/guil95/go-cleanarch/core/user/domain"
 	"io"
 	"log"
 	"mime/multipart"
