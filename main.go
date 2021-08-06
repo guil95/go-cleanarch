@@ -10,4 +10,5 @@ func main() {
 	mysqlDatabase := db.Connect()
 
 	api.Run(mysqlDatabase)
+	//workers.Run(mysqlDatabase)
 }

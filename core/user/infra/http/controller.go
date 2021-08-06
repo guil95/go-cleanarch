@@ -27,6 +27,10 @@ func CreateApi(r *gin.Engine, db *gorm.DB) {
 	r.POST("/users-batch", func(context *gin.Context) {
 		saveBatch(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 	})
+
+	r.POST("/users-async", func(context *gin.Context) {
+		saveAsync(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+	})
 }
 
 func list(c *gin.Context, service *userApplication.Service) {
@@ -76,14 +80,14 @@ func findById(c *gin.Context, service *userApplication.Service) {
 	return
 }
 
-type UserPayload struct {
+type CreateUserPayload struct {
 	Firstname string `json:"firstname" binding:"required"`
 	Lastname  string `json:"lastname" binding:"required"`
 	Age       int64  `json:"age" binding:"required,min=1"`
 }
 
 func save(c *gin.Context, service *userApplication.Service) {
-	var userPayload UserPayload
+	var userPayload CreateUserPayload
 
 	if err := c.ShouldBindJSON(&userPayload); err != nil {
 		log.Println(err)
@@ -113,11 +117,11 @@ func save(c *gin.Context, service *userApplication.Service) {
 		}
 
 		c.JSON(http.StatusInternalServerError, NewResponseError("Internal error"))
+
 		return
 	}
 
 	c.JSON(http.StatusCreated, userCreated)
-	return
 }
 
 func saveBatch(c *gin.Context, service *userApplication.Service) {
@@ -129,4 +133,19 @@ func saveBatch(c *gin.Context, service *userApplication.Service) {
 	}
 
 	service.SaveUserBatch(file)
+}
+
+func saveAsync(c *gin.Context, service *userApplication.Service) {
+	file, _, err := c.Request.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, NewResponseError("Internal Server Error"))
+		return
+	}
+
+	err = service.SaveAsync(file)
+
+	if err != nil {
+		return
+	}
 }

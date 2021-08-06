@@ -3,7 +3,9 @@ package user
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/json"
 	"github.com/guil95/go-cleanarch/core/user/domain"
+	"github.com/guil95/go-cleanarch/pkg/kafka"
 	"io"
 	"log"
 	"mime/multipart"
@@ -60,11 +62,56 @@ func (s Service) SaveUser(userToSave *user.User) (error, *user.User) {
 	return nil, u
 }
 
+func (s Service) SaveAsync(file multipart.File) error {
+	reader := csv.NewReader(bufio.NewReader(file))
+	var userSlice []*user.User
+	userLength := 0
+	userMaxSimultaneous := 50
+	counterRoutines := 0
+
+	for {
+		line, err := reader.Read()
+
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+			return err
+		}
+
+		age, _ := strconv.ParseInt(line[2], 10, 64)
+
+		userSlice = append(userSlice, user.NewUser(line[0], line[1], age))
+
+		userLength++
+
+		if userLength >= userMaxSimultaneous {
+			counterRoutines++
+			go func(users []*user.User) {
+				j, _ := json.Marshal(users)
+				kafka.Produce("users_create", string(j))
+			}(userSlice)
+
+			userLength = 0
+			userSlice = []*user.User{}
+		}
+	}
+
+	counterRoutines++
+
+	go func(users []*user.User) {
+		j, _ := json.Marshal(users)
+		kafka.Produce("users_create", string(j))
+	}(userSlice)
+
+	return nil
+}
+
 func (s Service) SaveUserBatch(file multipart.File) error {
 	reader := csv.NewReader(bufio.NewReader(file))
 	var userSlice []*user.User
 	userLength := 0
-	userMaxSimultaneous := 5000
+	userMaxSimultaneous := 10000
 	counterRoutines := 0
 	//errorc := make(chan error)
 
@@ -87,8 +134,8 @@ func (s Service) SaveUserBatch(file multipart.File) error {
 		if userLength >= userMaxSimultaneous {
 			counterRoutines++
 			go func(users []*user.User) {
-				//errorc <- s.repo.CreateBatch(users, userMaxSimultaneous)
-				_ = s.repo.CreateBatch(users, userMaxSimultaneous)
+				//errorc <- s.repo.CreateBatch(users)
+				_ = s.repo.CreateBatch(users)
 			}(userSlice)
 
 			userLength = 0
@@ -100,8 +147,8 @@ func (s Service) SaveUserBatch(file multipart.File) error {
 	counterRoutines++
 
 	go func(users []*user.User) {
-		_ = s.repo.CreateBatch(users, userMaxSimultaneous)
-		//errorc <- s.repo.CreateBatch(users, userMaxSimultaneous)
+		_ = s.repo.CreateBatch(users)
+		//errorc <- s.repo.CreateBatch(users)
 	}(userSlice)
 
 	//for i := 0; i < counterRoutines; i++ {
