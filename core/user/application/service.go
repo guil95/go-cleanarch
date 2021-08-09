@@ -66,7 +66,7 @@ func (s Service) SaveAsync(file multipart.File) error {
 	reader := csv.NewReader(bufio.NewReader(file))
 	var userSlice []*user.User
 	userLength := 0
-	userMaxSimultaneous := 50
+	userMaxSimultaneous := 5000
 	counterRoutines := 0
 
 	for {
