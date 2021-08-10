@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 	"os"
 )
 
-func Connect() *gorm.DB{
+func Connect() *gorm.DB {
 
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -17,7 +18,9 @@ func Connect() *gorm.DB{
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_DATABASE"))
 
-	connection, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	connection, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 
 	if err != nil {
 		log.Panic(err)

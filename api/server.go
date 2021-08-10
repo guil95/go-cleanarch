@@ -12,6 +12,7 @@ import (
 
 func Run(db *gorm.DB) {
 	log.Println("Listen server on :8000")
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	router.GET("/", func(context *gin.Context) {

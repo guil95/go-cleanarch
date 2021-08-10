@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 )
 
 const topic = "users_create"
@@ -21,6 +22,7 @@ type CreateUserConsumer struct {
 type CreateUserConsumerGroup struct {
 	repo     user.Repository
 	consumer sarama.ConsumerGroup
+	mu       sync.Mutex
 }
 
 func NewCreateUserConsumer(repo user.Repository, consumer sarama.Consumer) *CreateUserConsumer {
@@ -96,22 +98,29 @@ func (c *CreateUserConsumerGroup) ListenGroup() error {
 func (c *CreateUserConsumerGroup) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (c *CreateUserConsumerGroup) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *CreateUserConsumerGroup) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	c.mu.Lock()
+
 	for msg := range claim.Messages() {
-		var users []*user.User
-		usersJson := string(msg.Value)
+		go func(msg *sarama.ConsumerMessage) {
+			var users []*user.User
+			usersJson := string(msg.Value)
 
-		err := json.Unmarshal([]byte(usersJson), &users)
+			err := json.Unmarshal([]byte(usersJson), &users)
 
-		if err != nil {
-			return err
-		}
-		fmt.Println(fmt.Sprintf("%d novos usuarios", len(users)))
-		go func(users []*user.User) {
+			if err != nil {
+				log.Panic(err)
+				return
+			}
+
 			_ = c.repo.CreateBatch(users)
-		}(users)
 
-		sess.MarkMessage(msg, "")
+			log.Println(fmt.Sprintf("%d novos usuarios", len(users)))
+
+			sess.MarkMessage(msg, "")
+		}(msg)
 	}
+
+	c.mu.Unlock()
 
 	return nil
 }
