@@ -22,17 +22,17 @@ func CreateApi(app *fiber.App, db *gorm.DB) {
 		return nil
 	})
 
-	app.Get("/users", func(context *fiber.Ctx) error {
+	app.Post("/users", func(context *fiber.Ctx) error {
 		save(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 		return nil
 	})
 
-	app.Get("/users-batch", func(context *fiber.Ctx) error {
+	app.Post("/users-batch", func(context *fiber.Ctx) error {
 		saveBatch(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 		return nil
 	})
 
-	app.Get("/users-async", func(context *fiber.Ctx) error {
+	app.Post("/users-async", func(context *fiber.Ctx) error {
 		saveAsync(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
 		return nil
 	})
