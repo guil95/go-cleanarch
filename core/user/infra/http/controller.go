@@ -129,7 +129,7 @@ type CreateUserPayload struct {
 }
 
 func save(c *fiber.Ctx, service *userApplication.Service) {
-	var userPayload CreateUserPayload
+	var userPayload = new(CreateUserPayload)
 
 	if err := c.BodyParser(userPayload); err != nil {
 		log.Println(err)
