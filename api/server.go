@@ -1,25 +1,28 @@
 package api
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	userInfrastructure "github.com/guil95/go-cleanarch/core/user/infra/http"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
-	"os"
 )
 
 func Run(db *gorm.DB) {
 	log.Println("Listen server on :8000")
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
 
-	router.GET("/", func(context *gin.Context) {
-		context.JSON(http.StatusOK, gin.H{"message": "Poc golang clean arch"})
+	app := fiber.New()
+
+	app.Get("/", func(context *fiber.Ctx) error {
+		err := context.SendStatus(http.StatusOK)
+		if err != nil {
+			return nil
+		}
+
+		return context.JSON(fiber.Map{"message": "ok"})
 	})
 
-	userInfrastructure.CreateApi(router, db)
+	userInfrastructure.CreateApi(app, db)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("API_PORT")), router))
+	log.Fatal(app.Listen(":8000"))
 }

@@ -62,8 +62,18 @@ func (s Service) SaveUser(userToSave *user.User) (error, *user.User) {
 	return nil, u
 }
 
-func (s Service) SaveAsync(file multipart.File) error {
-	reader := csv.NewReader(bufio.NewReader(file))
+func (s Service) SaveAsync(file *multipart.FileHeader) error {
+	f, _ := file.Open()
+
+	defer func(f multipart.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
+
+	reader := csv.NewReader(bufio.NewReader(f))
+
 	var userSlice []*user.User
 	userLength := 0
 	userMaxSimultaneous := 8000
@@ -107,8 +117,17 @@ func (s Service) SaveAsync(file multipart.File) error {
 	return nil
 }
 
-func (s Service) SaveUserBatch(file multipart.File) error {
-	reader := csv.NewReader(bufio.NewReader(file))
+func (s Service) SaveUserBatch(file *multipart.FileHeader) error {
+	f, _ := file.Open()
+
+	defer func(f multipart.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
+
+	reader := csv.NewReader(bufio.NewReader(f))
 	var userSlice []*user.User
 	userLength := 0
 	userMaxSimultaneous := 10000
