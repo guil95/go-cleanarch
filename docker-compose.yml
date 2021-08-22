@@ -13,20 +13,15 @@ services:
       - .:/app
     networks:
       - bubble
-  db:
-    container_name: db.go-cleanarch
-    image: mysql:5.7
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password --init-file /db/migrations/init.sql
+  mongo.db:
+    container_name: mongo.db.go-cleanarch
+    image: mongo:3.4
+    command: mongod --maxConns 10000
     volumes:
-      - ./db/migrations/init.sql:/db/migrations/init.sql
-    expose:
-      - 3306
+      - mongo:/data/db
+      - ./db/migrations/init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=cleanarch_go_db
+      - "27017:27017"
     networks:
       - bubble
   zookeeper:
@@ -69,3 +64,6 @@ services:
 networks:
   bubble:
     external: true
+
+volumes:
+  mongo:

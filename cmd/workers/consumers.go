@@ -5,11 +5,11 @@ import (
 	"github.com/Shopify/sarama"
 	user_consumers "github.com/guil95/go-cleanarch/core/user/infra/brokers/kafka/consumers"
 	user "github.com/guil95/go-cleanarch/core/user/infra/repositories"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/mongo"
 	"os"
 )
 
-func Run(db *gorm.DB) {
+func Run(db *mongo.Database) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.ClientID = "go-cleanarch"
@@ -31,9 +31,9 @@ func Run(db *gorm.DB) {
 	consumeUserGroup(db, group)
 }
 
-func consumersUser(db *gorm.DB, consumer sarama.Consumer) {
+func consumersUser(db *mongo.Database, consumer sarama.Consumer) {
 	fmt.Println("init consumer")
-	repo := user.NewMysqlUserRepository(db)
+	repo := user.NewMongoUserRepository(db)
 
 	createUserConsumer := user_consumers.NewCreateUserConsumer(repo, consumer)
 	err := createUserConsumer.Listen()
@@ -43,9 +43,9 @@ func consumersUser(db *gorm.DB, consumer sarama.Consumer) {
 	}
 }
 
-func consumeUserGroup(db *gorm.DB, consumer sarama.ConsumerGroup) {
+func consumeUserGroup(db *mongo.Database, consumer sarama.ConsumerGroup) {
 	fmt.Println("init consumer")
-	repo := user.NewMysqlUserRepository(db)
+	repo := user.NewMongoUserRepository(db)
 
 	createUserConsumer := user_consumers.NewCreateUserConsumerGroup(repo, consumer)
 	err := createUserConsumer.ListenGroup()

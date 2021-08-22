@@ -27,6 +27,7 @@ require (
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/valyala/fasthttp v1.29.0 // indirect
 	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
+	go.mongodb.org/mongo-driver v1.7.1 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20210820121016-41cdb8703e55 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

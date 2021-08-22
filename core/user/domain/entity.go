@@ -9,15 +9,15 @@ var UserExists = errors.New("User existis")
 
 //User struct
 type User struct {
-	Identifier UUID   `json:"identifier"`
-	Name       string `gorm:"type:string;default:null" json:"name"`
-	Lastname   string `gorm:"type:string;default:null" json:"lastname"`
-	Age        int64  `gorm:"type:int;default:null" json:"age"`
+	Identifier string `json:"identifier"`
+	Name       string `json:"name" bson:"name"`
+	Lastname   string `json:"lastname" bson:"lastname"`
+	Age        int64  `json:"age" bson:"age"`
 }
 
 func NewUser(firstName string, lastName string, age int64) *User {
 	return &User{
-		Identifier: NewUUID(),
+		Identifier: NewUUID().String(),
 		Name:       firstName,
 		Lastname:   lastName,
 		Age:        age,

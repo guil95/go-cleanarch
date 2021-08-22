@@ -6,34 +6,34 @@ import (
 	userApplication "github.com/guil95/go-cleanarch/core/user/application"
 	userDomain "github.com/guil95/go-cleanarch/core/user/domain"
 	userInfrastructure "github.com/guil95/go-cleanarch/core/user/infra/repositories"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
 )
 
-func CreateApi(app *fiber.App, db *gorm.DB) {
+func CreateApi(app *fiber.App, db *mongo.Database) {
 	app.Get("/users", func(context *fiber.Ctx) error {
-		list(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+		list(context, userApplication.NewService(userInfrastructure.NewMongoUserRepository(db)))
 		return nil
 	})
 
 	app.Get("/users/:id", func(context *fiber.Ctx) error {
-		findById(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+		findById(context, userApplication.NewService(userInfrastructure.NewMongoUserRepository(db)))
 		return nil
 	})
 
 	app.Post("/users", func(context *fiber.Ctx) error {
-		save(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+		save(context, userApplication.NewService(userInfrastructure.NewMongoUserRepository(db)))
 		return nil
 	})
 
 	app.Post("/users-batch", func(context *fiber.Ctx) error {
-		saveBatch(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+		saveBatch(context, userApplication.NewService(userInfrastructure.NewMongoUserRepository(db)))
 		return nil
 	})
 
 	app.Post("/users-async", func(context *fiber.Ctx) error {
-		saveAsync(context, userApplication.NewService(userInfrastructure.NewMysqlUserRepository(db)))
+		saveAsync(context, userApplication.NewService(userInfrastructure.NewMongoUserRepository(db)))
 		return nil
 	})
 }
