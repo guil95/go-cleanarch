@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"github.com/guil95/go-cleanarch/core/user/domain"
 	"github.com/guil95/go-cleanarch/pkg/kafka"
 	"io"
@@ -130,7 +131,7 @@ func (s Service) SaveUserBatch(file *multipart.FileHeader) error {
 	reader := csv.NewReader(bufio.NewReader(f))
 	var userSlice []*user.User
 	userLength := 0
-	userMaxSimultaneous := 50000
+	userMaxSimultaneous := 200000
 	counterRoutines := 0
 	//errorc := make(chan error)
 
@@ -153,6 +154,7 @@ func (s Service) SaveUserBatch(file *multipart.FileHeader) error {
 		if userLength >= userMaxSimultaneous {
 			counterRoutines++
 			go func(users []*user.User) {
+				log.Println(fmt.Sprintf("Salvando %d usuários", len(users)))
 				//errorc <- s.repo.CreateBatch(users)
 				_ = s.repo.CreateBatch(users)
 			}(userSlice)

@@ -30,6 +30,10 @@ func (repo MongoUserRepository) List() (error, *[]userDomain.User) {
 	cursor, err := collection.Find(ctx, bson.D{{}})
 
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return userDomain.UserNotFound, nil
+		}
+
 		return err, nil
 	}
 
@@ -50,10 +54,6 @@ func (repo MongoUserRepository) List() (error, *[]userDomain.User) {
 		return err, nil
 	}
 
-	if len(users) == 0 {
-		return userDomain.UserNotFound, nil
-	}
-
 	return nil, &users
 }
 
@@ -67,11 +67,10 @@ func (repo MongoUserRepository) Get(uuid userDomain.UUID) (error, *userDomain.Us
 	err := collection.FindOne(ctx, bson.D{{Key: "identifier", Value: uuid.String()}}).Decode(&u)
 
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return userDomain.UserNotFound, nil
+		}
 		return err, nil
-	}
-
-	if u == (userDomain.User{}) {
-		return userDomain.UserNotFound, nil
 	}
 
 	return nil, &u
